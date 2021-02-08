@@ -7,7 +7,6 @@ output:
   xaringan::moon_reader:
     lib_dir: libs
     css: xaringan-themer.css
-    urlcolor: blue
     nature:
       highlightStyle: github
       highlightLines: true
@@ -22,7 +21,7 @@ knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
   warning = FALSE,
-  dpi = 400
+  dpi = 600
 )
 
 ```
@@ -50,6 +49,7 @@ penguins <- drop_na(penguins)
 
 ```
 
+
 ## Overview
 
 - What is a random forest?
@@ -69,6 +69,8 @@ penguins <- drop_na(penguins)
     + Heart failure risk prediction
     
     + Allograft loss risk prediction
+
+.footnote[slides are available online at https://bcjaeger.github.io/seminar---obliqueRSF/]
 
 ---
 class: inverse, center, middle
