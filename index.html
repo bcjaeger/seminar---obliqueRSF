@@ -76,19 +76,19 @@ We'll demonstrate the mechanics of decision trees by developing a prediction rul
 
 Dimensions for Adelie, Chinstrap and Gentoo Penguins at Palmer Station
 
-&lt;img src="slides_files/figure-html/fig_penguins_nopart-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/fig_penguins_nopart-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
 Partition all the penguins into flipper length &lt; 207 or ≥ 207 mm
 
-&lt;img src="slides_files/figure-html/fig_penguins_part1-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/fig_penguins_part1-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
 Partition penguins on the left side into into bill length &lt; 43 or ≥ 43 mm
 
-&lt;img src="slides_files/figure-html/fig_penguins_part2-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/fig_penguins_part2-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -110,7 +110,7 @@ Note: the survival outcomes are simulated
 
 With oblique splits, partitions do not need to be rectangles
 
-&lt;img src="slides_files/figure-html/fig_penguins_part2_oblique-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/fig_penguins_part2_oblique-1.png" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -191,19 +191,19 @@ __Weaknesses__
 
 Benchmark experiment from Jaeger et al. (ORSF vs. all y'all):
 
-![](slides_files/figure-html/fig_orsf_overall_comp-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/fig_orsf_overall_comp-1.png)&lt;!-- --&gt;
 
 ---
 
 How ORSF compares to others in terms of the Brier score
 
-![](slides_files/figure-html/fig_orsf_overall_comp_focus_left-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/fig_orsf_overall_comp_focus_left-1.png)&lt;!-- --&gt;
 
 ---
 
 How ORSF compares to others in terms of model concordance.
 
-![](slides_files/figure-html/fig_orsf_overall_comp_focus_right-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/fig_orsf_overall_comp_focus_right-1.png)&lt;!-- --&gt;
 
 ---
 class: inverse, center, middle
@@ -307,7 +307,7 @@ Bethany L Wisotzkey et al. [_Circulation_](https://www.ahajournals.org/doi/abs/1
 
 .right-column[
 
-![](slides_files/figure-html/fig_orsf_phts_auc-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/fig_orsf_phts_auc-1.png)&lt;!-- --&gt;
 
 Data presented are median values from 500 replications of Monte-Carlo cross validation
 
@@ -327,7 +327,7 @@ Bethany L Wisotzkey et al. [_Circulation_](https://www.ahajournals.org/doi/abs/1
 
 .right-column[
 
-![](slides_files/figure-html/fig_orsf_phts_gnd-1.png)&lt;!-- --&gt;
+![](index_files/figure-html/fig_orsf_phts_gnd-1.png)&lt;!-- --&gt;
 
 Data presented are median values from 500 replications of Monte-Carlo cross validation
 
@@ -374,11 +374,11 @@ predict(orsf_fit,
 
 ```
 ##           [,1]
-## [1,] 0.4164103
-## [2,] 0.9866667
-## [3,] 0.8698413
-## [4,] 0.8800000
-## [5,] 0.9380952
+## [1,] 0.3261905
+## [2,] 0.9512821
+## [3,] 0.9514739
+## [4,] 0.8571429
+## [5,] 0.9714286
 ```
 
 

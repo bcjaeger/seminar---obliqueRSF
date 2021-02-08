@@ -414,7 +414,7 @@ cval <- c("ORSF",
           "Ridge",
           "Step")
 
-pmat <- read_rds('data_overall_comp.rds') %>%
+pmat <- read_rds('data/data_overall_comp.rds') %>%
   mutate(
     m1 = factor(m1, levels = cval),
     m2 = factor(m2, levels = cval),
@@ -599,7 +599,7 @@ Bethany L Wisotzkey et al. [_Circulation_](https://www.ahajournals.org/doi/abs/1
 
 ```{r fig_orsf_phts_auc, fig.height=5.2, dpi=300}
 
-read_rds("data_phts_auc.rds") %>% 
+read_rds("data/data_phts_auc.rds") %>% 
   mutate(model = fct_reorder2(model, .x = n_predictors, .y = value_est)) %>% 
   ggplot() + 
   aes(x = n_predictors, 
@@ -648,7 +648,7 @@ Bethany L Wisotzkey et al. [_Circulation_](https://www.ahajournals.org/doi/abs/1
 
 ```{r fig_orsf_phts_gnd, fig.height=5.2, dpi=300}
 
-read_rds("data_phts_gnd.rds") %>% 
+read_rds("data/data_phts_gnd.rds") %>% 
   mutate(model = factor(
     model, 
     levels = c(
