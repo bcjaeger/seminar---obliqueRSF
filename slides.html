@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Oblique random survival forests</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Byron C. Jaeger" />
+    <meta name="date" content="2021-02-08" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Oblique random survival forests
+## Why I developed them and why my collaborators use them.
+### Byron C. Jaeger
+### February 8, 2021
+
+---
+
+
+
+
+
+
+## Overview
+
+- What is a random forest?
+
+    + Decision trees
+    
+    + Ensemble learning
+    
+- Oblique random survival forest (ORSF)
+
+    + Strengths/weaknesses
+    
+    + Benchmark
+    
+- ORSF in the wild
+
+    + Heart failure risk prediction
+    
+    + Allograft loss risk prediction
+
+---
+class: inverse, center, middle
+
+# What is a random forest?
+
+---
+background-image: url(img/penguins.png)
+background-size: 45%
+background-position: 85% 72.5%
+
+## Decision trees
+
+- Frequently used in supervised learning.
+
+- Partitions the space of predictor variables.
+
+- Can be used for classification, regression, and survival analysis. 
+
+.pull-left[
+We'll demonstrate the mechanics of decision trees by developing a prediction rule to classify penguin&lt;sup&gt;1&lt;/sup&gt; species (chinstrap, gentoo, or adelie) based on bill and flipper length.
+]
+
+.footnote[
+&lt;sup&gt;1&lt;/sup&gt;Data were collected and made available by [Dr. Kristen Gorman](https://www.uaf.edu/cfos/people/faculty/detail/kristen-gorman.php) and the [Palmer Station](https://pal.lternet.edu/), a member of the [Long Term Ecological Research Network](https://lternet.edu/).
+]
+
+---
+
+Dimensions for Adelie, Chinstrap and Gentoo Penguins at Palmer Station
+
+&lt;img src="slides_files/figure-html/fig_penguins_nopart-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+Partition all the penguins into flipper length &lt; 207 or ≥ 207 mm
+
+&lt;img src="slides_files/figure-html/fig_penguins_part1-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+Partition penguins on the left side into into bill length &lt; 43 or ≥ 43 mm
+
+&lt;img src="slides_files/figure-html/fig_penguins_part2-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+The same partitions, visualized as a binary tree.
+
+&lt;img src="img/rpart_plot_classif.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+Node text, top to bottom: predicted class type; predicted class probability; percentage of data in node;
+
+---
+
+For survival trees, the Kaplan-Meier curve or cumulative hazard function is calculated in each terminal node.
+
+&lt;img src="img/rpart_plot_surv.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+Note: the survival outcomes are simulated
+
+---
+
+With oblique splits, partitions do not need to be rectangles
+
+&lt;img src="slides_files/figure-html/fig_penguins_part2_oblique-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Ensemble learning
+
+Decision trees have been studied in thousands of peer reviewed articles and dozens of textbooks. Tl;dr: single trees are okay but not great at prediction.
+- Leo Breiman introduced the idea of ensemble learning through bagging (bootstrap aggregating).&lt;sup&gt;1&lt;/sup&gt;
+    + Form an ensemble of 'weak learners' that are de-correlated by fitting each to a bootstrapped replicate of the data.
+    + Individually, the learners give poor answers, but the collective wisdom of the ensemble is substantial.
+    + e.g., myself and friends in graduate school
+
+.footnote[&lt;sup&gt;1&lt;/sup&gt;Breiman, Leo. "Bagging predictors." Machine learning 24.2 (1996): 123-140.]
+
+---
+
+## Ensemble learning
+
+Decision trees have been studied in thousands of peer reviewed articles and dozens of textbooks. Tl;dr: single trees are okay but not great at prediction.
+
+- Leo Breiman introduced the idea of ensemble learning through bagging (bootstrap aggregating).&lt;sup&gt;1&lt;/sup&gt;
+- Later, Leo Breiman tweaked the idea of bagging by restricting candidate variables for splitting a node to a random subset.
+    + This modification created the random forest!&lt;sup&gt;2&lt;/sup&gt;
+
+.footnote[&lt;sup&gt;1&lt;/sup&gt;Breiman, Leo. "Bagging predictors." Machine learning 24.2 (1996): 123-140.&lt;br/&gt;&lt;sup&gt;2&lt;/sup&gt;Breiman, Leo. "Random forests." Machine learning 45.1 (2001): 5-32.]
+
+
+---
+
+## Ensemble learning
+
+Decision trees have been studied in thousands of peer reviewed articles and dozens of textbooks. Tl;dr: single trees are okay but not great at prediction.
+
+- Leo Breiman introduced the idea of ensemble learning through bagging (bootstrap aggregating).&lt;sup&gt;1&lt;/sup&gt;
+- Later, Leo Breiman tweaked the idea of bagging by restricting candidate variables for splitting a node to a random subset.&lt;sup&gt;2&lt;/sup&gt;
+- Even later, random survival forests were developed.&lt;sup&gt;3&lt;/sup&gt;
+
+.footnote[&lt;sup&gt;1&lt;/sup&gt;Breiman, Leo. "Bagging predictors." Machine learning 24.2 (1996): 123-140.&lt;br/&gt;&lt;sup&gt;2&lt;/sup&gt;Breiman, Leo. "Random forests." Machine learning 45.1 (2001): 5-32.&lt;br/&gt;&lt;sup&gt;3&lt;/sup&gt;Ishwaran, Hemant, et al. "Random survival forests." Annals of Applied Statistics 2.3 (2008): 841-860.]
+
+---
+
+## Ensemble learning
+
+Decision trees have been studied in thousands of peer reviewed articles and dozens of textbooks. Tl;dr: single trees are okay but not great at prediction.
+
+- Leo Breiman introduced the idea of ensemble learning through bagging (bootstrap aggregating).&lt;sup&gt;1&lt;/sup&gt;
+- Later, Leo Breiman tweaked the idea of bagging by restricting candidate variables for splitting a node to a random subset.&lt;sup&gt;2&lt;/sup&gt;
+- Even later, random survival forests were developed.&lt;sup&gt;3&lt;/sup&gt;
+- Even more later, I made the oblique random survival forest.&lt;sup&gt;4&lt;/sup&gt;
+
+.footnote[&lt;sup&gt;1&lt;/sup&gt;Breiman, Leo. "Bagging predictors." Machine learning 24.2 (1996): 123-140.&lt;br/&gt;&lt;sup&gt;2&lt;/sup&gt;Breiman, Leo. "Random forests." Machine learning 45.1 (2001): 5-32.&lt;br/&gt;&lt;sup&gt;3&lt;/sup&gt;Ishwaran, Hemant, et al. "Random survival forests." Annals of Applied Statistics 2.3 (2008): 841-860.&lt;br/&gt;&lt;sup&gt;4&lt;/sup&gt;Jaeger, Byron C., et al. "Oblique random survival forests." Annals of Applied Statistics 13.3 (2019): 1847-1883.]
+
+---
+class: inverse, center, middle
+
+# Oblique random survival forest (ORSF)
+
+---
+
+## Oblique random survival forest (ORSF)
+
+__Definition__: Ensemble of oblique survival decision trees grown with Leo Breiman's original protocol for random forests.
+
+__Strengths__:
+
+- ORSF directly models right censored time-to-event data, which are very common in medical settings.
+
+- oblique splitting increases efficiency, which makes ORSF ideal for smaller cohort studies.
+
+- risk prediction just works. (No need to estimate hazard functions).
+
+__Weaknesses__
+
+- slow (finding linear combinations takes time).
+
+- variable importance does not work as well for oblique splits.
+
+---
+
+Benchmark experiment from Jaeger et al. (ORSF vs. all y'all):
+
+![](slides_files/figure-html/fig_orsf_overall_comp-1.png)&lt;!-- --&gt;
+
+---
+
+How ORSF compares to others in terms of the Brier score
+
+![](slides_files/figure-html/fig_orsf_overall_comp_focus_left-1.png)&lt;!-- --&gt;
+
+---
+
+How ORSF compares to others in terms of model concordance.
+
+![](slides_files/figure-html/fig_orsf_overall_comp_focus_right-1.png)&lt;!-- --&gt;
+
+---
+class: inverse, center, middle
+
+# ORSF in the wild
+
+---
+
+External validation of 10-year risk prediction models for heart failure in the ARIC (Atherosclerosis risk in communities) and MESA/DHS (Multi-Ethnic Study of Atherosclerosis/Dallas Heart Study) cohorts.
+
+.left-column[
+__Source:__ _Development and Validation of Machine Learning-based Race-specific Models to Predict 10-year Risk of Heart Failure: A Multi-cohort Analysis_
+
+Matthew W Segar et al. [Circulation](https://doi.org/10.1161/circ.142.suppl_3.196) 2020; 142:A196
+]
+
+
+&lt;!-- Nambi V, Liu X, Chambless LE, et al. Troponin T and N-terminal pro-B-type natriuretic peptide: a biomarker approach to predict heart failure risk--the atherosclerosis risk in communities study. Clin Chem. 2013;59(12):1802-1810. --&gt;
+&lt;!-- 23.	Khan SS, Ning H, Shah SJ, et al. 10-Year Risk Equations for Incident Heart Failure in the General Population. J Am Coll Cardiol. 2019;73(19):2388-2397. --&gt;
+
+.right-column[
+
+&lt;table class="table" style="margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="empty-cells: hide;border-bottom:hidden;" colspan="1"&gt;&lt;/th&gt;
+&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;ARIC&lt;/div&gt;&lt;/th&gt;
+&lt;th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"&gt;&lt;div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; "&gt;MESA/DHS&lt;/div&gt;&lt;/th&gt;
+&lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Model &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; C-statistic &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; P-value&lt;sup&gt;1&lt;/sup&gt; &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; C-statistic &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; P-value&lt;sup&gt;1&lt;/sup&gt; &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr grouplength="3"&gt;&lt;td colspan="5" style="border-bottom: 1px solid;"&gt;&lt;strong&gt;Black adults&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; ORSF &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.81 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.24 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.83 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.170 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nambi et al &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.77 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.10 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.80 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.001 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Khan et al &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.71 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.79 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.78 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.540 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr groupLength="3"&gt;&lt;td colspan="5" style="border-bottom: 1px solid;"&gt;&lt;strong&gt;White adults&lt;/strong&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; ORSF &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -- &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -- &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.82 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.150 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Nambi et al &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -- &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -- &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.79 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.001 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Khan et al &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -- &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -- &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.80 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0.400 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;sup&gt;1&lt;/sup&gt;From modified Nam-D'Agostino test for mis-calibration
+
+]
+
+---
+
+Internal validation of 1-year risk prediction models for allograft loss or mortality in the PHTS (Pediatric Heart Transplant Society) registry.
+
+.left-column[
+
+__Continuation of:__ _Risk Factors for One-year Mortality and Allograft Loss in Pediatric Heart Transplant Patients Using Machine Learning_
+
+Bethany L Wisotzkey et al. [_Circulation_](https://www.ahajournals.org/doi/abs/10.1161/circ.142.suppl_3.14239). 2020; 142:A14239
+
+]
+
+.right-column[
+
+![](slides_files/figure-html/fig_orsf_phts_auc-1.png)&lt;!-- --&gt;
+
+Data presented are median values from 500 replications of Monte-Carlo cross validation
+
+]
+
+---
+
+Internal validation of 1-year risk prediction models for allograft loss or mortality in the PHTS (Pediatric Heart Transplant Society) registry.
+
+.left-column[
+
+__Continuation of:__ _Risk Factors for One-year Mortality and Allograft Loss in Pediatric Heart Transplant Patients Using Machine Learning_
+
+Bethany L Wisotzkey et al. [_Circulation_](https://www.ahajournals.org/doi/abs/10.1161/circ.142.suppl_3.14239). 2020; 142:A14239
+
+]
+
+.right-column[
+
+![](slides_files/figure-html/fig_orsf_phts_gnd-1.png)&lt;!-- --&gt;
+
+Data presented are median values from 500 replications of Monte-Carlo cross validation
+
+]
+
+---
+
+
+
+
+## What I've heard from friends
+
+The only reason ORSF has been used in recent projects is because others have been able to use it through the R package, `obliqueRSF`.
+
+`obliqueRSF` does two things particularly well: 
+
+- Develop accurate risk prediction models
+
+- Apply them to new data.
+
+.pull-left[
+
+
+```r
+library(obliqueRSF)
+
+orsf_fit &lt;- 
+  ORSF(data = pbc[-c(1:5), ], 
+       time = 'time', 
+       status = 'status', 
+       ntree = 5)
+```
+
+]
+
+.pull-right[
+
+
+```r
+predict(orsf_fit, 
+        newdata = pbc[1:5, ], 
+        times = 500)
+```
+
+```
+##           [,1]
+## [1,] 0.4164103
+## [2,] 0.9866667
+## [3,] 0.8698413
+## [4,] 0.8800000
+## [5,] 0.9380952
+```
+
+
+]
+
+---
+class: right, top
+background-image: url(img/collaborators_orsf.png)
+background-size: contain
+
+# Thank you!
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
